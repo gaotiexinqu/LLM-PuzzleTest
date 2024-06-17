@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "generate_all",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "G:\\LLM-PuzzleTest\\PuzzleVQA\\generation\\generate_all_kinds.py",
+            "console": "integratedTerminal",
+            "cwd": "G:\\LLM-PuzzleTest\\PuzzleVQA\\generation"
+        }
+    ]
+}

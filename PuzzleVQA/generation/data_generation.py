@@ -19,12 +19,20 @@ from tqdm import tqdm
 
 Point = Tuple[float, float]
 
+choice_style = ["A", "B", "C", "D"]
 
 class CircleSizeNumberPattern(BaseModel):
     image_size: int = 512
     scale_factor: int = 4
     path_font: str = "fonts/OpenSans-Light.ttf"
-    color: str = "#eeeeee"
+    color: str = dict(
+        gray="#eeeeee",         
+        blue="#6fa8dc",
+        green="#93c47d",
+        yellow="#ffd966",
+        red="#e06666",
+        purple="#8e7cc3",
+        orange="#f6b26b")
 
     def make_sample(self):
         # Set the size of the image
@@ -57,7 +65,7 @@ class CircleSizeNumberPattern(BaseModel):
                         small_circle_y + small_circle_radius,
                     ),
                 ],
-                fill=self.color,
+                fill=self.color[random.choice(list(self.color.keys()))],
                 outline="black",
                 width=4,
             )
@@ -83,17 +91,43 @@ class CircleSizeNumberPattern(BaseModel):
         numbers_min = min(numbers)
         numbers[answer_location] = "?"
 
+        question_list = [
+            "What is the value represented by the question mark?",
+            "What number should replace the question mark?",
+            "What is the missing value where the question mark is?",
+            "What number fits in place of the question mark?",
+            "Can you determine the number denoted by the question mark?",
+            "What is the unknown number indicated by the question mark?",
+            "What should the question mark be replaced with?",
+            "What is the figure represented by the question mark?"
+        ]
+        short_answer = choice_style[options.index(answer)]  #ABCD
+        options = [choice_style[i] + " " + str(ele) for i,ele in enumerate(options)]
+        detailed_answer = f"There are 6 numbered circles with varying sizes arranged in a ring with number {numbers} in a clockwise order. \
+We observe that the size of the circle is related to the number in the circle. The circle with the largest value {numbers_max} seems \
+to be the biggest and the circle with the smallest value {numbers_min} seems to be the smallest. Thus, the pattern is that the larger the number the larger the circle. \
+Based on the pattern that the larger the number the larger the circle, the missing number of the circle denoted with a question mark should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing number of the part denoted with a question mark?",
+                question=question_list[random.randint(0, 7)],
                 options=options,
-                answer=str(answer),
-                caption=f"There are 6 numbered circles with varying sizes arranged in a ring with number {numbers} in a clockwise order.",
-                explanation=f"We observe that the size of the circle is related to the number in the circle. The circle with the largest value {numbers_max} seems to be the biggest and the circle with the smallest value {numbers_min} seems to be the smallest. Thus, the pattern is that the larger the number the larger the circle.",
-                deduction=f"Based on the pattern that the larger the number the larger the circle, the missing number of the circle denoted with a question mark should be {answer}.",
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing number of the part denoted with a question mark?",
+        #         options=options,
+        #         answer=str(answer),
+        #         caption=f"There are 6 numbered circles with varying sizes arranged in a ring with number {numbers} in a clockwise order.",
+        #         explanation=f"We observe that the size of the circle is related to the number in the circle. The circle with the largest value {numbers_max} seems to be the biggest and the circle with the smallest value {numbers_min} seems to be the smallest. Thus, the pattern is that the larger the number the larger the circle.",
+        #         deduction=f"Based on the pattern that the larger the number the larger the circle, the missing number of the circle denoted with a question mark should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class ColorGridPattern(BaseModel):
@@ -160,17 +194,43 @@ class ColorGridPattern(BaseModel):
         grid = grid[::-1]
         location = "at the corner" if answer == names[0] else "adjacent to the center"
 
+        question_list = [
+            "What is the color represented by the question mark?",
+            "What color should replace the question mark?",
+            "What is the missing color where the question mark is?",
+            "What color fits in place of the question mark?",
+            "Can you determine the color denoted by the question mark?",
+            "What is the unknown color indicated by the question mark?",
+            "What should the question mark be replaced with in terms of color?",
+            "What is the hue represented by the question mark?"
+        ]
+        options=sample_options(answer, sorted(self.colors), k=4)
+        short_answer = choice_style[options.index(answer)]  #ABCD
+        options = [choice_style[i] + " " + str(ele) for i,ele in enumerate(options)]
+        detailed_answer = f"There are circles with different colors arranged with a grid formation in the image. The colors in the first row are {grid[:3]}, the colors in the second row are {grid[3:6]}, and the colors in the third row are {grid[6:9]}. \
+We observe that the circles at the corners are {names[0]}, while the circles directly adjacent to the center are {names[1]}. Only the center circle is {names[2]}. Hence, the pattern is that the circles alternate in color depending on if they are at the corner or adjacent to the center. \
+Based on the pattern that the circles alternate in color depending on if they are at the corner or adjacent to the center, the missing color of the part that is {location} should be {short_answer}."
+
         return (
             dict(
-                question="What is the color of the missing part denoted with a question mark?",
-                answer=answer,
+                question=question_list[random.randint(0, 7)],
                 options=sample_options(answer, sorted(self.colors), k=4),
-                caption=f"There are circles with different colors arranged with a grid formation in the image. The colors in the first row are {grid[:3]}, the colors in the second row are {grid[3:6]}, and the colors in the third row are {grid[6:9]}.",
-                explanation=f"We observe that the circles at the corners are {names[0]}, while the circles directly adjacent to the center are {names[1]}. Only the center circle is {names[2]}. Hence, the pattern is that the circles alternate in color depending on if they are at the corner or adjacent to the center.",
-                deduction=f"Based on the pattern that the circles alternate in color depending on if they are at the corner or adjacent to the center, the missing color of the part that is {location} should be {answer}.",
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the color of the missing part denoted with a question mark?",
+        #         answer=answer,
+        #         options=sample_options(answer, sorted(self.colors), k=4),
+        #         caption=f"There are circles with different colors arranged with a grid formation in the image. The colors in the first row are {grid[:3]}, the colors in the second row are {grid[3:6]}, and the colors in the third row are {grid[6:9]}.",
+        #         explanation=f"We observe that the circles at the corners are {names[0]}, while the circles directly adjacent to the center are {names[1]}. Only the center circle is {names[2]}. Hence, the pattern is that the circles alternate in color depending on if they are at the corner or adjacent to the center.",
+        #         deduction=f"Based on the pattern that the circles alternate in color depending on if they are at the corner or adjacent to the center, the missing color of the part that is {location} should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class ColorHexagonPattern(BaseModel):
@@ -250,17 +310,44 @@ class ColorHexagonPattern(BaseModel):
         names[i_answer] = "?"
         instances = sorted(set(n for n in names if n not in [answer, "?"]))
         image = image.resize((self.image_size, self.image_size), Image.LANCZOS)
+
+        question_list = [
+            "What is the color of the part denoted by the question mark?",
+            "What color should the part denoted by the question mark be?",
+            "What is the color missing where the question mark is?",
+            "What color fills the part indicated by the question mark?",
+            "Can you identify the color denoted by the question mark?",
+            "What is the missing color where the question mark appears?",
+            "What color replaces the question mark?",
+            "What color is represented by the question mark?"
+        ]
+        options = sample_options(answer, options=list(self.colors), k=4)
+        short_answer = choice_style[options.index(answer)]  #ABCD
+        options = [choice_style[i] + " " + str(ele) for i,ele in enumerate(options)]
+        detailed_answer = f"There is a hexagon split into six parts with the colors {names} in an anti-clockwise order. \
+We observe that a {instances[0]} part is opposite another {instances[0]} part, and a {instances[1]} part is opposite another {instances[1]} part. Thus, the pattern is that the colors in opposite parts are the same. \
+Based on the pattern that spatially opposite parts have the same color, the missing color of the part which is opposite a {answer} part should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing color of the part denoted with a question mark?",
-                answer=answer,
-                options=sample_options(answer, options=list(self.colors), k=4),
-                caption=f"There is a hexagon split into six parts with the colors {names} in an anti-clockwise order.",
-                explanation=f"We observe that a {instances[0]} part is opposite another {instances[0]} part, and a {instances[1]} part is opposite another {instances[1]} part. Thus, the pattern is that the colors in opposite parts are the same.",
-                deduction=f"Based on the pattern that spatially opposite parts have the same color, the missing color of the part which is opposite a {answer} part should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing color of the part denoted with a question mark?",
+        #         answer=answer,
+        #         options=sample_options(answer, options=list(self.colors), k=4),
+        #         caption=f"There is a hexagon split into six parts with the colors {names} in an anti-clockwise order.",
+        #         explanation=f"We observe that a {instances[0]} part is opposite another {instances[0]} part, and a {instances[1]} part is opposite another {instances[1]} part. Thus, the pattern is that the colors in opposite parts are the same.",
+        #         deduction=f"Based on the pattern that spatially opposite parts have the same color, the missing color of the part which is opposite a {answer} part should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class ColorNumberHexagonPattern(BaseModel):
@@ -351,17 +438,43 @@ class ColorNumberHexagonPattern(BaseModel):
         instances = sorted(set(n for n in names if n not in [answer, "?"]))
         image = image.resize((self.image_size, self.image_size), Image.LANCZOS)
 
+        question_list = [
+            "What is the number of the part denoted by the question mark?",
+            "What number should the part denoted by the question mark be?",
+            "What is the number missing where the question mark is?",
+            "What number fills the part indicated by the question mark?",
+            "Can you identify the number denoted by the question mark?",
+            "What is the missing number where the question mark appears?",
+            "What number replaces the question mark?",
+            "What number is represented by the question mark?"
+        ]
+        options = [str(o) for o in generate_number_options(answer, k=4)]
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        options = [choice_style[i] + " " + str(ele) for i,ele in enumerate(options)]
+        detailed_answer = f"There is a hexagon split into six parts with the colors {names} in an anti-clockwise order. The parts are denoted with the numbers {numbers} respectively. \
+We observe that the numbers in the {instances[0]} parts add up to {value}. Similarly, the numbers in the {instances[1]} parts also add up to {value}. Thus, the pattern is that the numbers in the parts of the same color add up to {value}. \
+Based on the pattern that the numbers in the parts of the same color add up to {value}, the missing number of the {names[i_answer]} part should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing number of the part denoted with a question mark?",
-                answer=answer,
-                options=[str(o) for o in generate_number_options(answer, k=4)],
-                caption=f"There is a hexagon split into six parts with the colors {names} in an anti-clockwise order. The parts are denoted with the numbers {numbers} respectively.",
-                explanation=f"We observe that the numbers in the {instances[0]} parts add up to {value}. Similarly, the numbers in the {instances[1]} parts also add up to {value}. Thus, the pattern is that the numbers in the parts of the same color add up to {value}.",
-                deduction=f"Based on the pattern that the numbers in the parts of the same color add up to {value}, the missing number of the {names[i_answer]} part should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing number of the part denoted with a question mark?",
+        #         answer=answer,
+        #         options=[str(o) for o in generate_number_options(answer, k=4)],
+        #         caption=f"There is a hexagon split into six parts with the colors {names} in an anti-clockwise order. The parts are denoted with the numbers {numbers} respectively.",
+        #         explanation=f"We observe that the numbers in the {instances[0]} parts add up to {value}. Similarly, the numbers in the {instances[1]} parts also add up to {value}. Thus, the pattern is that the numbers in the parts of the same color add up to {value}.",
+        #         deduction=f"Based on the pattern that the numbers in the parts of the same color add up to {value}, the missing number of the {names[i_answer]} part should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class ColorOverlapSquaresPattern(BaseModel):
@@ -457,17 +570,43 @@ class ColorOverlapSquaresPattern(BaseModel):
             instances = [color_names[1], color_names[2], color_names[4]]
             overlap = color_names[3]
 
+        question_list = [
+            "What is the color of the part denoted by the question mark?",
+            "What color should the part denoted by the question mark be?",
+            "What is the color missing where the question mark is?",
+            "What color fills the part indicated by the question mark?",
+            "Can you identify the color denoted by the question mark?",
+            "What is the missing color where the question mark appears?",
+            "What color replaces the question mark?",
+            "What color is represented by the question mark?"
+        ]
+        options = sample_options(answer, sorted(self.colors), k=4)
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        options = [choice_style[i] + " " + str(ele) for i,ele in enumerate(options)]
+        detailed_answer = f"There are 3 squares which overlap each other in the image. The color of the squares are {color_names[:3]}. The part where the first and second squares overlap is {color_names[3]}. The part where the second and third squares overlap is {color_names[4]}. \
+We observe that the {instances[0]} and {instances[1]} squares overlap to form {instances[2]}. Hence, the pattern is that the color of the part where two squares overlap is determined by mixing the two colors. \
+Based on the pattern that the color of the part where two squares overlap is determined by mixing the two colors, the missing color of the part which overlaps with {color_names[1]} to form {overlap} should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing color of the part denoted with a question mark?",
-                answer=answer,
-                options=sample_options(answer, sorted(self.colors), k=4),
-                caption=f"There are 3 squares which overlap each other in the image. The color of the squares are {color_names[:3]}. The part where the first and second squares overlap is {color_names[3]}. The part where the second and third squares overlap is {color_names[4]}.",
-                explanation=f"We observe that the {instances[0]} and {instances[1]} squares overlap to form {instances[2]}. Hence, the pattern is that the color of the part where two squares overlap is determined by mixing the two colors.",
-                deduction=f"Based on the pattern that the color of the part where two squares overlap is determined by mixing the two colors, the missing color of the part which overlaps with {color_names[1]} to form {overlap} should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing color of the part denoted with a question mark?",
+        #         answer=answer,
+        #         options=sample_options(answer, sorted(self.colors), k=4),
+        #         caption=f"There are 3 squares which overlap each other in the image. The color of the squares are {color_names[:3]}. The part where the first and second squares overlap is {color_names[3]}. The part where the second and third squares overlap is {color_names[4]}.",
+        #         explanation=f"We observe that the {instances[0]} and {instances[1]} squares overlap to form {instances[2]}. Hence, the pattern is that the color of the part where two squares overlap is determined by mixing the two colors.",
+        #         deduction=f"Based on the pattern that the color of the part where two squares overlap is determined by mixing the two colors, the missing color of the part which overlaps with {color_names[1]} to form {overlap} should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class ColorSizeCirclePattern(BaseModel):
@@ -542,6 +681,33 @@ class ColorSizeCirclePattern(BaseModel):
 
         shuffled = random.sample(pairs, k=len(pairs))
         image = image.resize((self.image_size, self.image_size), Image.LANCZOS)
+
+        question_list = [
+            "What is the color of the missing part denoted with a question mark?",
+            "What color should the missing part denoted with a question mark be?",
+            "What is the missing color where the question mark is?",
+            "What color fits in the missing part indicated by the question mark?",
+            "Can you identify the color of the missing part denoted with a question mark?",
+            "What is the unknown color of the part marked with a question mark?",
+            "What color completes the part denoted by the question mark?",
+            "What is the color represented by the question mark?"
+        ]
+        options = random.sample(options, k=len(options))
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        options = [choice_style[i] + " " + str(ele) for i,ele in enumerate(options)]
+        detailed_answer = f"There are circles of various sizes and colors in the image. The circles are {[p[0] for p in shuffled]} size, and their colors are {[p[1] for p in shuffled]}. \
+We observe that the largest circle is {pairs[0][1]} color, and the smaller circles change color from {pairs[1][1]} to {pairs[2][1]}. Hence, the pattern is that the circles become {trend} as they become smaller. \
+Based on the pattern that the circles become {trend} as they become smaller, the missing color of the smallest circle denoted with a question mark should be {short_answer}."
+
+        return (
+            dict(
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
+            ),
+            image,
+        )
+
         return (
             dict(
                 question="What is the missing color of the part denoted with a question mark?",
@@ -660,17 +826,42 @@ class GridNumberColorPattern(BaseModel):
                     row.append((matrix[i, j], num2col[matrix[i, j]]))
             caption_details.append(row)
 
+        question_list = [
+            f"What is the missing color if the part denoted with the question mark has the number {answer_number}?",
+            f"If the part with the question mark is numbered {answer_number}, what is its missing color?",
+            f"What color is missing from the part marked with a question mark if its number is {answer_number}?",
+            f"What is the color of the missing part if the number denoted by the question mark is {answer_number}?",
+            f"Can you identify the missing color if the part with the question mark is numbered {answer_number}?",
+            f"What is the unknown color if the question mark denotes the number {answer_number}?",
+            f"What color completes the part if the number denoted by the question mark is {answer_number}?",
+            f"What is the missing color represented by the question mark if its number is {answer_number}?"
+        ]
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        options = [choice_style[i] + " " + str(ele) for i,ele in enumerate(options)]
+        detailed_answer = f"There is a 3x3 colored grid of numbers. The first row has number-color pair {caption_details[0]}, the second row is {caption_details[1]}, and the third and final row is {caption_details[2]}. \
+We observe that the grid cells with number {values[0]} is {num2col[values[0]]} in color, the grid cells with number {values[1]} is {num2col[values[1]]} in color, the grid cells with number {values[2]} is {num2col[values[2]]} in color, and the grid cells with number {values[3]} is {num2col[values[3]]} in color. Thus, the pattern is that the grid cell with the same number will have the same color. \
+Based on the pattern that the grid cell with the same number will have the same color, the missing color of the part with {answer_number} should be {short_answer}."
+
         return (
             dict(
-                question=f"What is the missing color if the part denoted with the question mark has the number {answer_number}?",
-                answer=answer,
+                question=question_list[random.randint(0, 7)],
                 options=options,
-                caption=f"There is a 3x3 colored grid of numbers. The first row has number-color pair {caption_details[0]}, the second row is {caption_details[1]}, and the third and final row is {caption_details[2]}.",
-                explanation=f"We observe that the grid cells with number {values[0]} is {num2col[values[0]]} in color, the grid cells with number {values[1]} is {num2col[values[1]]} in color, the grid cells with number {values[2]} is {num2col[values[2]]} in color, and the grid cells with number {values[3]} is {num2col[values[3]]} in color. Thus, the pattern is that the grid cell with the same number will have the same color.",
-                deduction=f"Based on the pattern that the grid cell with the same number will have the same color, the missing color of the part with {answer_number} should be {answer}.",
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question=f"What is the missing color if the part denoted with the question mark has the number {answer_number}?",
+        #         answer=answer,
+        #         options=options,
+        #         caption=f"There is a 3x3 colored grid of numbers. The first row has number-color pair {caption_details[0]}, the second row is {caption_details[1]}, and the third and final row is {caption_details[2]}.",
+        #         explanation=f"We observe that the grid cells with number {values[0]} is {num2col[values[0]]} in color, the grid cells with number {values[1]} is {num2col[values[1]]} in color, the grid cells with number {values[2]} is {num2col[values[2]]} in color, and the grid cells with number {values[3]} is {num2col[values[3]]} in color. Thus, the pattern is that the grid cell with the same number will have the same color.",
+        #         deduction=f"Based on the pattern that the grid cell with the same number will have the same color, the missing color of the part with {answer_number} should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class GridNumberPattern(BaseModel):
@@ -742,17 +933,42 @@ class GridNumberPattern(BaseModel):
         instances.extend([row for row in matrix if "?" in row])
         assert len(instances) == len(matrix)
 
+        question_list = [
+            "What is the number of the part denoted by the question mark?",
+            "What number should the part denoted by the question mark be?",
+            "What is the number missing where the question mark is?",
+            "What number fills the part indicated by the question mark?",
+            "Can you identify the number denoted by the question mark?",
+            "What is the missing number where the question mark appears?",
+            "What number replaces the question mark?",
+            "What number is represented by the question mark?"
+        ]
+        options = list(map(str, values))
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There is a 3x3 grid of numbers. The first row is {matrix[0]}. The second row is {matrix[1]}. The third and last row is {matrix[2]}. \
+We observe that {instances[0]} sums to {sum(instances[0])}, and {instances[1]} also sums to {sum(instances[1])}. Thus, the pattern is that the numbers in each row add up to the same value. \
+Based on the pattern that the numbers in each row add up to the same value, the missing number of the row {instances[2]} should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing number of the part denoted with a question mark?",
-                answer=str(answer),
-                options=list(map(str, values)),
-                caption=f"There is a 3x3 grid of numbers. The first row is {matrix[0]}. The second row is {matrix[1]}. The third and last row is {matrix[2]}.",
-                explanation=f"We observe that {instances[0]} sums to {sum(instances[0])}, and {instances[1]} also sums to {sum(instances[1])}. Thus, the pattern is that the numbers in each row add up to the same value.",
-                deduction=f"Based on the pattern that the numbers in each row add up to the same value, the missing number of the row {instances[2]} should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing number of the part denoted with a question mark?",
+        #         answer=str(answer),
+        #         options=list(map(str, values)),
+        #         caption=f"There is a 3x3 grid of numbers. The first row is {matrix[0]}. The second row is {matrix[1]}. The third and last row is {matrix[2]}.",
+        #         explanation=f"We observe that {instances[0]} sums to {sum(instances[0])}, and {instances[1]} also sums to {sum(instances[1])}. Thus, the pattern is that the numbers in each row add up to the same value.",
+        #         deduction=f"Based on the pattern that the numbers in each row add up to the same value, the missing number of the row {instances[2]} should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class PolygonSidesColorPattern(BaseModel):
@@ -844,17 +1060,42 @@ class PolygonSidesColorPattern(BaseModel):
 
         image = image.resize((self.image_size, self.image_size), Image.LANCZOS)
 
+        question_list = [
+            "What is the color of the part denoted by the question mark?",
+            "What color should the part denoted by the question mark be?",
+            "What is the color missing where the question mark is?",
+            "What color fills the part indicated by the question mark?",
+            "Can you identify the color denoted by the question mark?",
+            "What is the missing color where the question mark appears?",
+            "What color replaces the question mark?",
+            "What color is represented by the question mark?"
+        ]
+        options = options
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There are 6 colored polygons arranged in a triangle with color {top_row} in the top row, {middle_row} in the middle row, and {bottom_row} in the bottom row. \
+We observe that the polygon with {explanation_side[0]} sides is {side2col[explanation_side[0]]} in color and the polygon with {explanation_side[1]} sides is {side2col[explanation_side[1]]} in color. Thus, the pattern is that the polygons with the same number of sides have the same color. \
+Based on the pattern that the polygons with the same number of sides have the same color, the missing color of the part with {sides[answer_location]} sides should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing color of the part denoted with a question mark?",
-                answer=answer,
+                question=question_list[random.randint(0, 7)],
                 options=options,
-                caption=f"There are 6 colored polygons arranged in a triangle with color {top_row} in the top row, {middle_row} in the middle row, and {bottom_row} in the bottom row.",
-                explanation=f"We observe that the polygon with {explanation_side[0]} sides is {side2col[explanation_side[0]]} in color and the polygon with {explanation_side[1]} sides is {side2col[explanation_side[1]]} in color. Thus, the pattern is that the polygons with the same number of sides have the same color.",
-                deduction=f"Based on the pattern that the polygons with the same number of sides have the same color, the missing color of the part with {sides[answer_location]} sides should be {answer}.",
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing color of the part denoted with a question mark?",
+        #         answer=answer,
+        #         options=options,
+        #         caption=f"There are 6 colored polygons arranged in a triangle with color {top_row} in the top row, {middle_row} in the middle row, and {bottom_row} in the bottom row.",
+        #         explanation=f"We observe that the polygon with {explanation_side[0]} sides is {side2col[explanation_side[0]]} in color and the polygon with {explanation_side[1]} sides is {side2col[explanation_side[1]]} in color. Thus, the pattern is that the polygons with the same number of sides have the same color.",
+        #         deduction=f"Based on the pattern that the polygons with the same number of sides have the same color, the missing color of the part with {sides[answer_location]} sides should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class PolygonSidesNumberPattern(BaseModel):
@@ -918,17 +1159,42 @@ class PolygonSidesNumberPattern(BaseModel):
 
         explanation_side = [side for side in sides if side != "?"]
 
+        question_list = [
+            "What is the number of the part denoted by the question mark?",
+            "What number should the part denoted by the question mark be?",
+            "What is the number missing where the question mark is?",
+            "What number fills the part indicated by the question mark?",
+            "Can you identify the number denoted by the question mark?",
+            "What is the missing number where the question mark appears?",
+            "What number replaces the question mark?",
+            "What number is represented by the question mark?"
+        ]
+        options = options
+        short_answer = choice_style[options.index(answer)]  #ABCD
+        detailed_answer = f"There are 6 numbered polygons arranged in a triangle with number {top_row} in the top row, {middle_row} in the middle row, and {bottom_row} in the bottom row. \
+We observe that the polygon with {explanation_side[0]} sides has the number {explanation_side[0]}, the polygon with {explanation_side[1]} sides has the number {explanation_side[1]}, the polygon with {explanation_side[2]} sides has the number {explanation_side[2]}, the polygon with {explanation_side[3]} sides has the number {explanation_side[3]}, and the polygon with {explanation_side[4]} sides has the number {explanation_side[4]}. Thus, the pattern is that the number inside the polygon represents the number of sides the polygon has. \
+Based on the pattern that the number inside the polygon represents the number of sides of the polygon, the missing number of the polygon with {answer} sides should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing number of the part denoted with a question mark?",
-                answer=str(answer),
+                question=question_list[random.randint(0, 7)],
                 options=options,
-                caption=f"There are 6 numbered polygons arranged in a triangle with number {top_row} in the top row, {middle_row} in the middle row, and {bottom_row} in the bottom row.",
-                explanation=f"We observe that the polygon with {explanation_side[0]} sides has the number {explanation_side[0]}, the polygon with {explanation_side[1]} sides has the number {explanation_side[1]}, the polygon with {explanation_side[2]} sides has the number {explanation_side[2]}, the polygon with {explanation_side[3]} sides has the number {explanation_side[3]}, and the polygon with {explanation_side[4]} sides has the number {explanation_side[4]}. Thus, the pattern is that the number inside the polygon represents the number of sides the polygon has.",
-                deduction=f"Based on the pattern that the number inside the polygon represents the number of sides of the polygon, the missing number of the polygon with {answer} sides should be {answer}.",
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing number of the part denoted with a question mark?",
+        #         answer=str(answer),
+        #         options=options,
+        #         caption=f"There are 6 numbered polygons arranged in a triangle with number {top_row} in the top row, {middle_row} in the middle row, and {bottom_row} in the bottom row.",
+        #         explanation=f"We observe that the polygon with {explanation_side[0]} sides has the number {explanation_side[0]}, the polygon with {explanation_side[1]} sides has the number {explanation_side[1]}, the polygon with {explanation_side[2]} sides has the number {explanation_side[2]}, the polygon with {explanation_side[3]} sides has the number {explanation_side[3]}, and the polygon with {explanation_side[4]} sides has the number {explanation_side[4]}. Thus, the pattern is that the number inside the polygon represents the number of sides the polygon has.",
+        #         deduction=f"Based on the pattern that the number inside the polygon represents the number of sides of the polygon, the missing number of the polygon with {answer} sides should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class RectangleHeightColorPattern(BaseModel):
@@ -1009,17 +1275,42 @@ class RectangleHeightColorPattern(BaseModel):
         instances = list(set((a, b) for (a, b) in zip(lengths, colors) if b != answer))
         colors[-1] = "?"
 
+        question_list = [
+            "What is the color of the part denoted by the question mark?",
+            "What color should the part denoted by the question mark be?",
+            "What is the color missing where the question mark is?",
+            "What color fills the part indicated by the question mark?",
+            "Can you identify the color denoted by the question mark?",
+            "What is the missing color where the question mark appears?",
+            "What color replaces the question mark?",
+            "What color is represented by the question mark?"
+        ]
+        options = sample_options(answer, sorted(self.colors), k=4)
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There are {len(numbers)} rectangles in the image with varying colors and lengths. The lengths from left to right are {lengths}. The colors from left to right are {colors}. \
+We observe that the {instances[0][1]} rectangles are of {instances[0][0]} length and the {instances[1][1]} rectangles are of {instances[1][0]} length. Hence, the pattern is that the color of each rectangle corresponds to its length. \
+Based on the pattern that the color of each rectangle corresponds to its length, the missing color of the part denoted with a question mark should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing color of the part denoted with a question mark?",
-                answer=str(answer),
-                options=sample_options(answer, sorted(self.colors), k=4),
-                caption=f"There are {len(numbers)} rectangles in the image with varying colors and lengths. The lengths from left to right are {lengths}. The colors from left to right are {colors}.",
-                explanation=f"We observe that the {instances[0][1]} rectangles are of {instances[0][0]} length and the {instances[1][1]} rectangles are of {instances[1][0]} length. Hence, the pattern is that the color of each rectangle corresponds to its length.",
-                deduction=f"Based on the pattern that the color of each rectangle corresponds to its length, the missing color of the part denoted with a question mark should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing color of the part denoted with a question mark?",
+        #         answer=str(answer),
+        #         options=sample_options(answer, sorted(self.colors), k=4),
+        #         caption=f"There are {len(numbers)} rectangles in the image with varying colors and lengths. The lengths from left to right are {lengths}. The colors from left to right are {colors}.",
+        #         explanation=f"We observe that the {instances[0][1]} rectangles are of {instances[0][0]} length and the {instances[1][1]} rectangles are of {instances[1][0]} length. Hence, the pattern is that the color of each rectangle corresponds to its length.",
+        #         deduction=f"Based on the pattern that the color of each rectangle corresponds to its length, the missing color of the part denoted with a question mark should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class RectangleHeightNumberPattern(BaseModel):
@@ -1073,17 +1364,42 @@ class RectangleHeightNumberPattern(BaseModel):
         lengths = [["short", "medium", "long"][num - 1] for num in numbers]
         numbers[-1] = "?"
 
+        question_list = [
+            "What number should replace the question mark?",
+            "What is the value of the part denoted by the question mark?",
+            "What is the number missing where the question mark is?",
+            "What number belongs in the place of the question mark?",
+            "Can you identify the number represented by the question mark?",
+            "What is the unknown number indicated by the question mark?",
+            "What number should be filled in for the question mark?",
+            "What is the figure that the question mark represents?"
+        ]
+        options = random.sample([1, 2, 3, 4], k=4)
+        short_answer = choice_style[options.index(answer)]  #ABCD
+        detailed_answer = f"There are {len(numbers)} rectangles in the image with varying lengths and numbers inside them. The numbers from left to right are {numbers}. The lengths from left to right are {lengths}. \
+We observe that the short rectangles are denoted as 1, the medium rectangles are denoted as 2, and the long rectangles are denoted as 3. Hence, the pattern is that the number in each rectangle corresponds to its length. \
+Based on the pattern that the number in each rectangle corresponds to its length, the missing number of the rectangle with a question mark should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing number of the part denoted with a question mark?",
-                answer=str(answer),
-                options=random.sample([1, 2, 3, 4], k=4),
-                caption=f"There are {len(numbers)} rectangles in the image with varying lengths and numbers inside them. The numbers from left to right are {numbers}. The lengths from left to right are {lengths}.",
-                explanation=f"We observe that the short rectangles are denoted as 1, the medium rectangles are denoted as 2, and the long rectangles are denoted as 3. Hence, the pattern is that the number in each rectangle corresponds to its length.",
-                deduction=f"Based on the pattern that the number in each rectangle corresponds to its length, the missing number of the rectangle with a question mark should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing number of the part denoted with a question mark?",
+        #         answer=str(answer),
+        #         options=random.sample([1, 2, 3, 4], k=4),
+        #         caption=f"There are {len(numbers)} rectangles in the image with varying lengths and numbers inside them. The numbers from left to right are {numbers}. The lengths from left to right are {lengths}.",
+        #         explanation=f"We observe that the short rectangles are denoted as 1, the medium rectangles are denoted as 2, and the long rectangles are denoted as 3. Hence, the pattern is that the number in each rectangle corresponds to its length.",
+        #         deduction=f"Based on the pattern that the number in each rectangle corresponds to its length, the missing number of the rectangle with a question mark should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 def get_polygon_point(num_sides: int, r: int, angle: int) -> Tuple[float, float]:
@@ -1198,17 +1514,42 @@ class ShapeMorphPattern(BaseModel):
         start_shape = names[1] if names[0] == "?" else names[0]
         answer_location = " ".join(direction.split()[-2:])
 
+        question_list = [
+            "What shape should replace the question mark?",
+            "What is the shape of the part denoted by the question mark?",
+            "What is the shape missing where the question mark is?",
+            "What shape belongs in the place of the question mark?",
+            "Can you identify the shape represented by the question mark?",
+            "What is the unknown shape indicated by the question mark?",
+            "What shape should be filled in for the question mark?",
+            "What is the figure that the question mark represents?"
+        ]
+        options = sample_options(answer, sorted(self.shapes), k=4)
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There are eight shapes arranged in a grid. The top left shape is a {names[0]} and the bottom right shape is a {names[1]}. The other shapes do not appear to regular shapes. \
+We observe that from the {direction} direction, the shapes look like a {start_shape} but gradually change shape into something like a {answer}. Hence, the pattern is the the shapes are morphing between {start_shape} and {answer} shapes. \
+Based on the pattern that the shapes are morphing between {start_shape} and {answer} shapes, the missing shape at the {answer_location} should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing shape of the part denoted with a question mark?",
-                answer=answer,
-                options=sample_options(answer, sorted(self.shapes), k=4),
-                caption=f"There are eight shapes arranged in a grid. The top left shape is a {names[0]} and the bottom right shape is a {names[1]}. The other shapes do not appear to regular shapes.",
-                explanation=f"We observe that from the {direction} direction, the shapes look like a {start_shape} but gradually change shape into something like a {answer}. Hence, the pattern is the the shapes are morphing between {start_shape} and {answer} shapes.",
-                deduction=f"Based on the pattern that the shapes are morphing between {start_shape} and {answer} shapes, the missing shape at the {answer_location} should be a {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing shape of the part denoted with a question mark?",
+        #         answer=answer,
+        #         options=sample_options(answer, sorted(self.shapes), k=4),
+        #         caption=f"There are eight shapes arranged in a grid. The top left shape is a {names[0]} and the bottom right shape is a {names[1]}. The other shapes do not appear to regular shapes.",
+        #         explanation=f"We observe that from the {direction} direction, the shapes look like a {start_shape} but gradually change shape into something like a {answer}. Hence, the pattern is the the shapes are morphing between {start_shape} and {answer} shapes.",
+        #         deduction=f"Based on the pattern that the shapes are morphing between {start_shape} and {answer} shapes, the missing shape at the {answer_location} should be a {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class ShapeReflectPattern(BaseModel):
@@ -1295,17 +1636,43 @@ class ShapeReflectPattern(BaseModel):
         image = image.resize((self.image_size, self.image_size), Image.LANCZOS)
         names[i_answer] = "?"
         instances = sorted(set(n for n in names if n != "?"))
+
+        question_list = [
+            "What is the shape of the part denoted by the question mark?",
+            "What shape should replace the question mark?",
+            "What is the shape missing where the question mark is?",
+            "What shape belongs in the place of the question mark?",
+            "Can you identify the shape represented by the question mark?",
+            "What is the unknown shape indicated by the question mark?",
+            "What shape should be filled in for the question mark?",
+            "What figure is represented by the question mark?"
+        ]
+        options = sample_options(answer, sorted(self.shapes), k=4)
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There are six shapes in the image separated by a line. In the top part there are {names[:3]}. In the bottom part there are {names[3:]}. \
+We observe that the {instances[0]} is reflected across the line as a {instances[0]}. Similarly, the {instances[1]} is reflected as a {instances[1]}. Hence, the pattern is that each shape in the top part is reflected in the bottom part. \
+Based on the pattern that each shape in the top part is reflected in the bottom part, the missing shape which is reflected from a {answer} part should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing shape denoted by a question mark?",
-                answer=answer,
-                options=sample_options(answer, sorted(self.shapes), k=4),
-                caption=f"There are six shapes in the image separated by a line. In the top part there are {names[:3]}. In the bottom part there are {names[3:]}.",
-                explanation=f"We observe that the {instances[0]} is reflected across the line as a {instances[0]}. Similarly, the {instances[1]} is reflected as a {instances[1]}. Hence, the pattern is that each shape in the top part is reflected in the bottom part.",
-                deduction=f"Based on the pattern that each shape in the top part is reflected in the bottom part, the missing shape which is reflected from a {answer} part should be a {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing shape denoted by a question mark?",
+        #         answer=answer,
+        #         options=sample_options(answer, sorted(self.shapes), k=4),
+        #         caption=f"There are six shapes in the image separated by a line. In the top part there are {names[:3]}. In the bottom part there are {names[3:]}.",
+        #         explanation=f"We observe that the {instances[0]} is reflected across the line as a {instances[0]}. Similarly, the {instances[1]} is reflected as a {instances[1]}. Hence, the pattern is that each shape in the top part is reflected in the bottom part.",
+        #         deduction=f"Based on the pattern that each shape in the top part is reflected in the bottom part, the missing shape which is reflected from a {answer} part should be a {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class ShapeSizeGridPattern(BaseModel):
@@ -1403,17 +1770,42 @@ class ShapeSizeGridPattern(BaseModel):
             trend_shapes = f"rows contain {data[0][0][0]}s, {data[1][0][0]}s, and {data[2][0][0]}s respectively"
             pattern = "the shapes within each row are the same, while each column progresses the size of the shapes"
 
+        question_list = [
+            "What is the size of the part denoted by the question mark?",
+            "What size should replace the question mark?",
+            "What is the size missing where the question mark is?",
+            "What size belongs in the place of the question mark?",
+            "Can you identify the size represented by the question mark?",
+            "What is the unknown size indicated by the question mark?",
+            "What size should be filled in for the question mark?",
+            "What is the dimension represented by the question mark?"
+        ]
+        options = sample_options(answer[1], sorted(mapping), k=3)
+        short_answer = choice_style[options.index(str(answer[1]))]  #ABCD
+        detailed_answer = f"There are 9 shapes arranged in a grid with different sizes in the image, of which there is 1 missing shape. The first row is {m[0]}, the second row is {m[1]}, and the third row is {m[2]}. \
+We observe that the {trend_size}. On the other hand, the {trend_shapes}. Hence, the pattern is that {pattern}. \
+Based on the pattern that {pattern}, the size of the missing {answer[0]} should be {short_answer}."
+
         return (
             dict(
-                question=f"What is the size of the missing part denoted by a question mark?",
-                answer=answer[1],
-                options=sample_options(answer[1], sorted(mapping), k=3),
-                caption=f"There are 9 shapes arranged in a grid with different sizes in the image, of which there is 1 missing shape. The first row is {m[0]}, the second row is {m[1]}, and the third row is {m[2]}.",
-                explanation=f"We observe that the {trend_size}. On the other hand, the {trend_shapes}. Hence, the pattern is that {pattern}.",
-                deduction=f"Based on the pattern that {pattern}, the size of the missing {answer[0]} should be {answer[1]}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question=f"What is the size of the missing part denoted by a question mark?",
+        #         answer=answer[1],
+        #         options=sample_options(answer[1], sorted(mapping), k=3),
+        #         caption=f"There are 9 shapes arranged in a grid with different sizes in the image, of which there is 1 missing shape. The first row is {m[0]}, the second row is {m[1]}, and the third row is {m[2]}.",
+        #         explanation=f"We observe that the {trend_size}. On the other hand, the {trend_shapes}. Hence, the pattern is that {pattern}.",
+        #         deduction=f"Based on the pattern that {pattern}, the size of the missing {answer[0]} should be {answer[1]}.",
+        #     ),
+        #     image,
+        # )
 
 
 class ShapeSizeHexagonPattern(BaseModel):
@@ -1474,30 +1866,64 @@ class ShapeSizeHexagonPattern(BaseModel):
         self.draw_text(draw, center, "?")
 
         image = image.resize((self.image_size, self.image_size), Image.LANCZOS)
+
+        question_list = [
+            f"What is the size of the missing shape denoted with a question mark if it is a {answer_shape}?",
+            f"If the missing shape denoted by the question mark is a {answer_shape}, what is its size?",
+            f"What size is the missing shape with a question mark if it is a {answer_shape}?",
+            f"What is the size of the shape represented by the question mark if it is a {answer_shape}?",
+            f"Can you identify the size of the missing shape denoted by a question mark if it is a {answer_shape}?",
+            f"What is the unknown size of the shape marked with a question mark if it is a {answer_shape}?",
+            f"What size should the missing shape be if it is a {answer_shape} and denoted by a question mark?",
+            f"What are the dimensions of the missing shape denoted by a question mark if it is a {answer_shape}?"
+        ]
+        options = sample_options(answer_size, options=size_names, k=3)
+        short_answer = choice_style[options.index(str(answer_size))]  #ABCD
+        detailed_answer = f"There are 7 shapes with different sizes in the image, of which there is a missing {answer_shape} in the center. The other shapes are arranged around the center, which are {shape_names * 2} in anti-clockwise order. Their corresponding sizes are {size_names * 2}. \
+We observe that the {shape_names[0]}s are {size_names[0]} size, the {shape_names[1]}s are {size_names[1]} size, and the {shape_names[2]}s are {size_names[2]} size. Hence, the pattern is that each shape appears with a distinct size. \
+Based on the pattern that each shape appears with a distinct size, the size of the missing {answer_shape} should be {short_answer}."
+
         return (
             dict(
-                question=f"What is the size of the missing shape denoted with a question mark if it is a {answer_shape}?",
-                answer=answer_size,
-                options=sample_options(answer_size, options=size_names, k=3),
-                caption=f"There are 7 shapes with different sizes in the image, of which there is a missing {answer_shape} in the center. The other shapes are arranged around the center, which are {shape_names * 2} in anti-clockwise order. Their corresponding sizes are {size_names * 2}.",
-                explanation=f"We observe that the {shape_names[0]}s are {size_names[0]} size, the {shape_names[1]}s are {size_names[1]} size, and the {shape_names[2]}s are {size_names[2]} size. Hence, the pattern is that each shape appears with a distinct size.",
-                deduction=f"Based on the pattern that each shape appears with a distinct size, the size of the missing {answer_shape} should be {answer_size}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question=f"What is the size of the missing shape denoted with a question mark if it is a {answer_shape}?",
+        #         answer=answer_size,
+        #         options=sample_options(answer_size, options=size_names, k=3),
+        #         caption=f"There are 7 shapes with different sizes in the image, of which there is a missing {answer_shape} in the center. The other shapes are arranged around the center, which are {shape_names * 2} in anti-clockwise order. Their corresponding sizes are {size_names * 2}.",
+        #         explanation=f"We observe that the {shape_names[0]}s are {size_names[0]} size, the {shape_names[1]}s are {size_names[1]} size, and the {shape_names[2]}s are {size_names[2]} size. Hence, the pattern is that each shape appears with a distinct size.",
+        #         deduction=f"Based on the pattern that each shape appears with a distinct size, the size of the missing {answer_shape} should be {answer_size}.",
+        #     ),
+        #     image,
+        # )
 
 
 class SizeCyclePattern(BaseModel):
     image_size: int = 512
     scale_factor: int = 4
     path_font: str = "fonts/OpenSans-Medium.ttf"
-    color: str = "#fff2cc"  # Light yellow for all circles
+    # color: str = "#fff2cc"  # Light yellow for all circles
+    color: str = dict(
+        gray="#eeeeee",         
+        blue="#6fa8dc",
+        green="#93c47d",
+        yellow="#ffd966",
+        red="#e06666",
+        purple="#8e7cc3",
+        orange="#f6b26b")
 
-    def draw_circle(self, draw: ImageDraw, point: Point, radius: int):
+    def draw_circle(self, draw: ImageDraw, point: Point, radius: int, color: str):
         x, y = point
         position = x - radius, y - radius, x + radius, y + radius
         line_width = self.image_size * self.scale_factor // 150
-        draw.ellipse(position, fill=self.color, outline="black", width=line_width)
+        draw.ellipse(position, fill=color, outline="black", width=line_width)
 
     @staticmethod
     def get_points(n_sides: int, center: Point, radius: int, angle: int) -> List[Point]:
@@ -1552,6 +1978,7 @@ class SizeCyclePattern(BaseModel):
         num_sides = 3
         answer = ""
         i_answer = random.randint(0, num_sides * len(mapping) - 1)
+        color = self.color[random.choice(list(self.color.keys()))]
         for n, (radius, distance, angle) in mapping.items():
             for p in self.get_points(num_sides, center, distance, angle):
                 names.append(n)
@@ -1559,7 +1986,7 @@ class SizeCyclePattern(BaseModel):
                     self.draw_text(draw, p, "?")
                     answer = n
                 else:
-                    self.draw_circle(draw, p, round(radius))
+                    self.draw_circle(draw, p, round(radius), color)
 
         names[i_answer] = "?"
         arms = [
@@ -1574,29 +2001,62 @@ class SizeCyclePattern(BaseModel):
             large="farthest from center",
         )[answer]
 
+        question_list = [
+            "What is the size of the missing circle denoted with a question mark?",
+            "What size should the missing circle denoted by the question mark be?",
+            "What is the size missing where the question mark indicates a circle?",
+            "What is the size of the circle represented by the question mark?",
+            "Can you identify the size of the missing circle denoted by a question mark?",
+            "What is the unknown size of the circle marked with a question mark?",
+            "What size should be filled in for the missing circle denoted by a question mark?",
+            "What are the dimensions of the missing circle represented by the question mark?"
+        ]
+        options = sample_options(answer, sorted(mapping), k=3)
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There are circles arranged in a spiral with three arms. The first arm has circles of sizes {arms[0]}, the second arm has circles of sizes {arms[1]}, and the third arm has circles of sizes {arms[2]}. \
+We observe that the circles in each arm progress in size from small to medium to large. Thus, the pattern is that the circles in each arm get bigger as they progress away from the center of the spiral. \
+Based on the pattern that the circles in each arm get bigger as they progress away from the center of the spiral, the size of the missing part that is {answer_location} should be {short_answer}."
+
         return (
             dict(
-                question="What is the size of the missing circle denoted with a question mark?",
-                answer=answer,
-                options=sample_options(answer, sorted(mapping), k=3),
-                caption=f"There are circles arranged in a spiral with three arms. The first arm has circles of sizes {arms[0]}, the second arm has circles of sizes {arms[1]}, and the third arm has circles of sizes {arms[2]}.",
-                explanation=f"We observe that the circles in each arm progress in size from small to medium to large. Thus, the pattern is that the circles in each arm get bigger as they progress away from the center of the spiral.",
-                deduction=f"Based on the pattern that the circles in each arm get bigger as they progress away from the center of the spiral, the size of the missing part that is {answer_location} should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the size of the missing circle denoted with a question mark?",
+        #         answer=answer,
+        #         options=sample_options(answer, sorted(mapping), k=3),
+        #         caption=f"There are circles arranged in a spiral with three arms. The first arm has circles of sizes {arms[0]}, the second arm has circles of sizes {arms[1]}, and the third arm has circles of sizes {arms[2]}.",
+        #         explanation=f"We observe that the circles in each arm progress in size from small to medium to large. Thus, the pattern is that the circles in each arm get bigger as they progress away from the center of the spiral.",
+        #         deduction=f"Based on the pattern that the circles in each arm get bigger as they progress away from the center of the spiral, the size of the missing part that is {answer_location} should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class SizeGridPattern(BaseModel):
     image_size: int = 512
     scale_factor: int = 4
     path_font: str = "fonts/OpenSans-Medium.ttf"
-    color: str = "#fff2cc"  # Light yellow for all circles
+    # color: str = "#fff2cc"  # Light yellow for all circles
+    color: str = dict(
+        gray="#eeeeee",         
+        blue="#6fa8dc",
+        green="#93c47d",
+        yellow="#ffd966",
+        red="#e06666",
+        purple="#8e7cc3",
+        orange="#f6b26b")
 
-    def draw_circle(self, draw: ImageDraw, x: int, y: int, radius: int):
+    def draw_circle(self, draw: ImageDraw, x: int, y: int, radius: int, color: str):
         position = x - radius, y - radius, x + radius, y + radius
         line_width = self.image_size * self.scale_factor // 200
-        draw.ellipse(position, fill=self.color, outline="black", width=line_width)
+        draw.ellipse(position, fill=color, outline="black", width=line_width)
 
     def make_sample(self):
         # Set the size of the image
@@ -1613,6 +2073,7 @@ class SizeGridPattern(BaseModel):
         i_answer = random.choice([0, 2, 6, 8, 1, 3, 5, 7])
         answer = ""
 
+        color = self.color[random.choice(list(self.color.keys()))]
         for k, lst in mapping.items():
             radius = radii[k]
             for i in lst:
@@ -1626,7 +2087,7 @@ class SizeGridPattern(BaseModel):
                         fill="black",
                     )
                 else:
-                    self.draw_circle(draw, *positions[i], radius=radius)
+                    self.draw_circle(draw, *positions[i], radius=radius, color = color)
 
         options = sample_options(answer, list(radii.keys()), k=3)
         image = image.resize((self.image_size, self.image_size), Image.LANCZOS)
@@ -1640,17 +2101,42 @@ class SizeGridPattern(BaseModel):
             "at the corner" if i_answer in [0, 2, 6, 8] else "adjacent to the center"
         )
 
+        question_list = [
+            "What is the size of the part denoted by the question mark?",
+            "What size should replace the question mark?",
+            "What is the size missing where the question mark is?",
+            "What size belongs in the place of the question mark?",
+            "Can you identify the size represented by the question mark?",
+            "What is the unknown size indicated by the question mark?",
+            "What size should be filled in for the question mark?",
+            "What are the dimensions represented by the question mark?"
+        ]
+        options = options
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There are circles arranged in a grid formation with varying sizes in the image. The sizes in the first row are {grid[:3]}, the sizes in the second row are {grid[3:6]}, and the sizes in the third row are {grid[6:9]}. \
+We observe that the circles at the corners are {keys[0]} size, while the circles directly adjacent to the center are {keys[1]} size. Only the center circle is {keys[2]} size. Hence, the pattern is that the circles alternate in size depending on if they are at the corner or adjacent to the center. \
+Based on the pattern that the circles alternate in size depending on if they are at the corner or adjacent to the center, the size of the missing part that is {answer_location} should be {short_answer}."
+
         return (
             dict(
-                question="What is the size of the missing part denoted with a question mark?",
-                answer=answer,
+                question=question_list[random.randint(0, 7)],
                 options=options,
-                caption=f"There are circles arranged in a grid formation with varying sizes in the image. The sizes in the first row are {grid[:3]}, the sizes in the second row are {grid[3:6]}, and the sizes in the third row are {grid[6:9]}.",
-                explanation=f"We observe that the circles at the corners are {keys[0]} size, while the circles directly adjacent to the center are {keys[1]} size. Only the center circle is {keys[2]} size. Hence, the pattern is that the circles alternate in size depending on if they are at the corner or adjacent to the center.",
-                deduction=f"Based on the pattern that the circles alternate in size depending on if they are at the corner or adjacent to the center, the size of the missing part that is {answer_location} should be {answer}.",
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the size of the missing part denoted with a question mark?",
+        #         answer=answer,
+        #         options=options,
+        #         caption=f"There are circles arranged in a grid formation with varying sizes in the image. The sizes in the first row are {grid[:3]}, the sizes in the second row are {grid[3:6]}, and the sizes in the third row are {grid[6:9]}.",
+        #         explanation=f"We observe that the circles at the corners are {keys[0]} size, while the circles directly adjacent to the center are {keys[1]} size. Only the center circle is {keys[2]} size. Hence, the pattern is that the circles alternate in size depending on if they are at the corner or adjacent to the center.",
+        #         deduction=f"Based on the pattern that the circles alternate in size depending on if they are at the corner or adjacent to the center, the size of the missing part that is {answer_location} should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 class NumbersTrianglePattern(BaseModel):
@@ -1658,7 +2144,15 @@ class NumbersTrianglePattern(BaseModel):
     image_size: int = 512
     scale_factor: int = 4
     num_sides: int = 3
-    color: str = "#cfe2f3"  # Light blue
+    # color: str = "#cfe2f3"  # Light blue
+    color: str = dict(
+        gray="#eeeeee",         
+        blue="#6fa8dc",
+        green="#93c47d",
+        yellow="#ffd966",
+        red="#e06666",
+        purple="#8e7cc3",
+        orange="#f6b26b")
 
     def get_points(self, center: Point, radius: float) -> List[Point]:
         vertices = []
@@ -1669,11 +2163,11 @@ class NumbersTrianglePattern(BaseModel):
             vertices.append((x, y))
         return vertices
 
-    def draw_circle(self, draw: ImageDraw, point: Point, radius: float, **kwargs):
+    def draw_circle(self, draw: ImageDraw, point: Point, radius: float, color: str, **kwargs):
         x, y = point
         position = x - radius, y - radius, x + radius, y + radius
         line_width = self.image_size * self.scale_factor // 200
-        draw.ellipse(position, width=line_width, fill=self.color, **kwargs)
+        draw.ellipse(position, width=line_width, fill=color, **kwargs)
 
     def draw_text(self, draw: ImageDraw, point: Point, text: str):
         size = self.image_size * self.scale_factor
@@ -1701,9 +2195,10 @@ class NumbersTrianglePattern(BaseModel):
             # noinspection PyTypeChecker
             subpoints = self.get_points(point, radius=size / 10)
             draw.polygon(subpoints, outline="black", width=size // 200)
+            color = self.color[random.choice(list(self.color.keys()))]
             for j, sub in enumerate(subpoints):
                 # noinspection PyTypeChecker
-                self.draw_circle(draw, sub, radius=size / 16, outline="black")
+                self.draw_circle(draw, sub, radius=size / 16, outline="black", color = color)
                 # noinspection PyTypeChecker
                 self.draw_text(draw, sub, str(numbers[i * 3 + j]))
 
@@ -1713,17 +2208,42 @@ class NumbersTrianglePattern(BaseModel):
         instances.extend([lst for lst in groups if "?" in lst])
         assert len(instances) == 3
 
+        question_list = [
+            "What is the missing number of the part denoted by a question mark?",
+            "What number should replace the question mark?",
+            "What is the missing number where the question mark is?",
+            "What number belongs in the place of the question mark?",
+            "Can you identify the number denoted by the question mark?",
+            "What is the unknown number indicated by the question mark?",
+            "What number should be filled in for the question mark?",
+            "What is the figure represented by the question mark?"
+        ]
+        options = [str(o) for o in generate_number_options(int(answer), k=4)]
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There are three groups of numbers with a triangle arrangement in the image. The first group is {groups[0]}, the second group is {groups[1]}, and the third group is {groups[2]}. \
+We observe that the number {instances[0][2]} is the product of {instances[0][1]} and {instances[0][0]}. Similarly, the number {instances[1][2]} is the product of {instances[1][1]} and {instances[1][0]}. Hence, the pattern is that the rightmost number in each group is the product of the other two numbers. \
+Based on the pattern that the rightmost number in each group is the product of the other two numbers, the missing number of the group {instances[2]} should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing number of the part denoted with a question mark?",
-                options=[str(o) for o in generate_number_options(int(answer), k=4)],
-                answer=answer,
-                caption=f"There are three groups of numbers with a triangle arrangement in the image. The first group is {groups[0]}, the second group is {groups[1]}, and the third group is {groups[2]}.",
-                explanation=f"We observe that the number {instances[0][2]} is the product of {instances[0][1]} and {instances[0][0]}. Similarly, the number {instances[1][2]} is the product of {instances[1][1]} and {instances[1][0]}. Hence, the pattern is that the rightmost number in each group is the product of the other two numbers.",
-                deduction=f"Based on the pattern that the rightmost number in each group is the product of the other two numbers, the missing number of the group {instances[2]} should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing number of the part denoted with a question mark?",
+        #         options=[str(o) for o in generate_number_options(int(answer), k=4)],
+        #         answer=answer,
+        #         caption=f"There are three groups of numbers with a triangle arrangement in the image. The first group is {groups[0]}, the second group is {groups[1]}, and the third group is {groups[2]}.",
+        #         explanation=f"We observe that the number {instances[0][2]} is the product of {instances[0][1]} and {instances[0][0]}. Similarly, the number {instances[1][2]} is the product of {instances[1][1]} and {instances[1][0]}. Hence, the pattern is that the rightmost number in each group is the product of the other two numbers.",
+        #         deduction=f"Based on the pattern that the rightmost number in each group is the product of the other two numbers, the missing number of the group {instances[2]} should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 def get_pixels(image: Image, fraction_x: float, fraction_y: float) -> Tuple[int, int]:
@@ -1771,17 +2291,42 @@ class VennPattern(BaseModel):
         lst = [a, b, ab] if c == "?" else [b, c, bc]
         lst_b = [a, b, ab] if c != "?" else [b, c, bc]
 
+        question_list = [
+            "What is the missing number of the part denoted by a question mark?",
+            "What number should replace the question mark?",
+            "What is the number missing where the question mark is?",
+            "What number belongs in the place of the question mark?",
+            "Can you identify the number denoted by the question mark?",
+            "What is the unknown number indicated by the question mark?",
+            "What number should be filled in for the question mark?",
+            "What is the figure represented by the question mark?"
+        ]
+        options = [str(o) for o in generate_number_options(answer, k=4)]
+        short_answer = choice_style[options.index(str(answer))]  #ABCD
+        detailed_answer = f"There are 3 overlapping circles containing the numbers {[a, b, c]}. The overlapping part between the first and second circle contains the number {ab}. The overlapping part between the second and third circle contains the number {bc}. \
+We observe that the circles with {lst[0]} and {lst[1]} overlap to form the part {lst[2]}, where {lst[0]} + {lst[1]} = {lst[2]}. Hence, the pattern is most likely that the numbers in the overlapping parts are the sum of the numbers in the corresponding circles. \
+Based on the pattern that the numbers in the overlapping parts are the sum of the numbers in the corresponding circles, the missing number of the circle where the overlapping part is {lst_b[-1]} should be {short_answer}."
+
         return (
             dict(
-                question="What is the missing number of the part denoted with a question mark?",
-                answer=answer,
-                options=[str(o) for o in generate_number_options(answer, k=4)],
-                caption=f"There are 3 overlapping circles containing the numbers {[a, b, c]}. The overlapping part between the first and second circle contains the number {ab}. The overlapping part between the second and third circle contains the number {bc}.",
-                explanation=f"We observe that the circles with {lst[0]} and {lst[1]} overlap to form the part {lst[2]}, where {lst[0]} + {lst[1]} = {lst[2]}. Hence, the pattern is most likely that the numbers in the overlapping parts are the sum of the numbers in the corresponding circles.",
-                deduction=f"Based on the pattern that the numbers in the overlapping parts are the sum of the numbers in the corresponding circles, the missing number of the circle where the overlapping part is {lst_b[-1]} should be {answer}.",
+                question=question_list[random.randint(0, 7)],
+                options=options,
+                answer=str(short_answer if random.randint(0, 1) else detailed_answer)
             ),
             image,
         )
+
+        # return (
+        #     dict(
+        #         question="What is the missing number of the part denoted with a question mark?",
+        #         answer=answer,
+        #         options=[str(o) for o in generate_number_options(answer, k=4)],
+        #         caption=f"There are 3 overlapping circles containing the numbers {[a, b, c]}. The overlapping part between the first and second circle contains the number {ab}. The overlapping part between the second and third circle contains the number {bc}.",
+        #         explanation=f"We observe that the circles with {lst[0]} and {lst[1]} overlap to form the part {lst[2]}, where {lst[0]} + {lst[1]} = {lst[2]}. Hence, the pattern is most likely that the numbers in the overlapping parts are the sum of the numbers in the corresponding circles.",
+        #         deduction=f"Based on the pattern that the numbers in the overlapping parts are the sum of the numbers in the corresponding circles, the missing number of the circle where the overlapping part is {lst_b[-1]} should be {answer}.",
+        #     ),
+        #     image,
+        # )
 
 
 def select_pattern(name: str, **kwargs):
@@ -1872,7 +2417,7 @@ def create_data(
 
     progress = tqdm(range(limit))
 
-    pattern = select_pattern(pattern_name)
+    pattern = select_pattern(pattern_name)  # 返回类名，适用于不同的类有同名函数
     samples = []
     seen = []
     question_idx = 0
@@ -1902,7 +2447,7 @@ def create_data(
             samples.append(sample)
             progress.update()
 
-    with open(f"{path}/{pattern_name}.json", "w") as f:
+    with open(f"{path}/{pattern_name}.jsonl", "w") as f:
         for line in samples:
             f.write(json.dumps(line) + "\n")
 
