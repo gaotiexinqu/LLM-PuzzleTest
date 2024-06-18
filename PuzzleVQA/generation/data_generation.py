@@ -2410,7 +2410,7 @@ def convert_image_to_text(image: Image) -> str:
 def create_data(
     pattern_name: str, path: str = "data", limit: int = 100, unique: bool = True
 ):
-    random.seed(0)
+    random.seed(0)  # 设定种子
     np.random.seed(0)
 
     os.makedirs(f"{path}/images/{pattern_name}", exist_ok=True)

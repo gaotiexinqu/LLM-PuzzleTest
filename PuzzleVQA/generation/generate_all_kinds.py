@@ -7,6 +7,7 @@ class_list = [
     "shape_size_hexagon","size_cycle","size_grid","triangle","venn"
 ]
 
-create_data("venn", limit=10, unique=True)
-print("finish generation")
+for i in class_list:
+    create_data(i, limit=200, unique=True)
+print("finish generation!")
 
